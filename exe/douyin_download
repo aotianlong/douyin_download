@@ -5,12 +5,20 @@ require "thor"
 class DouyinDownloadCli < Thor
   desc "download URL", "download a video from douyin shared url"
   def download(url)
-    puts "download #{url}"
-    parser = DouyinDownload::Parser.new(url)
-    play_url = parser.play_url
-    description = parser.description
-    filename = parser.download
-    puts "download complete, file: #{filename}"
+    begin
+      puts "download #{url}"
+      parser = DouyinDownload::Parser.new(url)
+      play_url = parser.play_url
+      description = parser.description
+      filename = parser.download
+      if filename
+        puts "download failed."
+      else
+        puts "download complete, file: #{filename}"
+      end
+    rescue Exception => e
+      puts "download failed: '#{e.message}'"
+    end
   end
 end
 DouyinDownloadCli.start(ARGV)

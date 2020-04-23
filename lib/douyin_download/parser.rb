@@ -75,13 +75,16 @@ class DouyinDownload::Parser
   end
 
   def download(filename: nil)
-    body = Faraday.get(play_url, {}, 'User-Agent': MOBILE_USER_AGENT).body
-    # filename ||= [douyin_id, description].join("-") + ".mp4"
-    filename ||= douyin_id + ".mp4"
-    File.open(filename,"wb+"){|f|
-      f.write body
-    }
-    filename
+    begin
+      body = Faraday.get(play_url, {}, 'User-Agent': MOBILE_USER_AGENT).body
+      # filename ||= [douyin_id, description].join("-") + ".mp4"
+      filename ||= douyin_id + ".mp4"
+      File.open(filename,"wb+"){|f|
+        f.write body
+      }
+      filename
+    rescue Exception
+    end
   end
 
   private
