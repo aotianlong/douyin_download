@@ -12,9 +12,9 @@ class DouyinDownloadCli < Thor
       description = parser.description
       filename = parser.download
       if filename
-        puts "download failed."
-      else
         puts "download complete, file: #{filename}"
+      else
+        puts "download failed."
       end
     rescue Exception => e
       puts "download failed: '#{e.message}'"
