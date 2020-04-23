@@ -38,4 +38,11 @@ RSpec.describe DouyinDownload::Parser do
     end
   end
 
+  describe "#douyin_id" do
+    it do
+      douyin_id = parser.douyin_id
+      expect(douyin_id).to eq 'T4Sjhd'
+    end
+  end
+
 end

@@ -1,6 +1,7 @@
 require "faraday"
 require "json"
 class DouyinDownload::Parser
+  MOBILE_USER_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1"
   class InvalidDouyinUrlError < Exception; end
   def initialize(url)
     @url = url
@@ -8,6 +9,11 @@ class DouyinDownload::Parser
     unless  @url =~ regexp
       raise InvalidDouyinUrlError.new("Invalid douyin url: #{@url}")
     end
+  end
+
+  def douyin_id
+    url = @url.gsub /https?:\/\/v\.douyin\.com\//,''
+    url.gsub '/',''
   end
 
   def long_url
@@ -27,15 +33,22 @@ class DouyinDownload::Parser
     info.dig('item_list',0,'desc')
   end
 
-  def play_url
+  def api_play_url
     info.dig('item_list',0,'video','play_addr','url_list',0)
+  end
+
+  def play_url
+    # 这个是终极的播放url
+    # http://v9-dy-y.ixigua.com/390e2ef55562a7f85c79d98dc9814475/5ea127a5/video/tos/cn/tos-cn-ve-15/7131a6682c1040c1aa713f8405c34670/?a=1128&amp;br=0&amp;bt=907&amp;cr=0&amp;cs=0&amp;dr=0&amp;ds=6&amp;er=&amp;l=202004231229000100140472040B062432&amp;lr=&amp;qs=0&amp;rc=M3I7NG87PHVodDMzNmkzM0ApaTM2Ojc3Zzs8N2Y6ZTU7ZGdfMGJsNTNhNmRfLS0tLS9zcy40NDU0YDM2LWA2NC1eLzM6Yw%3D%3D&amp;vl=&amp;vr
+    headers = Faraday.get(api_play_url,{},'User-Agent': MOBILE_USER_AGENT).headers
+    headers['location']
   end
 
   def info
     # 用移动端设备ua访问该页面
     @info ||= begin
       result = {}
-      ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1"
+      ua = MOBILE_USER_AGENT
       body = Faraday.get(long_url, {}, 'User-Agent': ua).body
       # puts body
       regexp = /\.init\(\{(.+)\}\)\;\s+\}\)\;/m
@@ -59,6 +72,16 @@ class DouyinDownload::Parser
       end
       result
     end
+  end
+
+  def download(filename: nil)
+    body = Faraday.get(play_url, {}, 'User-Agent': MOBILE_USER_AGENT).body
+    # filename ||= [douyin_id, description].join("-") + ".mp4"
+    filename ||= douyin_id + ".mp4"
+    File.open(filename,"wb+"){|f|
+      f.write body
+    }
+    filename
   end
 
   private
