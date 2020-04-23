@@ -22,7 +22,18 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+require "douyin_download"
+url = "https://v.douyin.com/T4Sjhd/"
+parser = DouyinDownload::Parser.new url
+parser.play_url # video url without watermark
+```
+
+```bash
+douyin_download download https://v.douyin.com/T4Sjhd/
+```
+
+this command should download the video named T4Sjhd.mp4
 
 ## Development
 
